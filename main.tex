@@ -4,6 +4,40 @@
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{array}
+\usepackage{listings} % 加载 listings 包
+\usepackage{color}
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{ %
+  language=Octave,                % the language of the code
+  basicstyle=\footnotesize,           % the size of the fonts that are used for the code
+  numbers=left,                   % where to put the line-numbers
+  numberstyle=\tiny\color{gray},  % the style that is used for the line-numbers
+  stepnumber=2,                   % the step between two line-numbers. If it's 1, each line 
+                                  % will be numbered
+  numbersep=5pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{white},      % choose the background color. You must add \usepackage{color}
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  frame=single,                   % adds a frame around the code
+  rulecolor=\color{black},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+  tabsize=2,                      % sets default tabsize to 2 spaces
+  captionpos=b,                   % sets the caption-position to bottom
+  breaklines=true,                % sets automatic line breaking
+  breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+  title=\lstname,                   % show the filename of files included with \lstinputlisting;
+                                  % also try caption instead of title
+  keywordstyle=\color{blue},          % keyword style
+  commentstyle=\color{dkgreen},       % comment style
+  stringstyle=\color{mauve},         % string literal style
+  escapeinside={\%*}{*)},            % if you want to add LaTeX within your code
+  morekeywords={*,...}               % if you want to add more keywords to the set
+}
 
 %%-------------------------------正文开始---------------------------%%
 \begin{document}
@@ -60,6 +94,68 @@
 提升了我们的产品设计思维。
 \section{技术路线}
 \subsection{使用pypinyin库}
+python-pinyin是一个用于将汉字转换为拼音的python库,其开源地址为\url{https://github.com/mozillazg/python-pinyin}。它支持多种拼音风格，包括声调和无声调。我们可以使用它来实现对文档中多音字的自动标注。
+\begin{lstlisting}[caption={python-pinyin的使用示例}, label={lst:example}]
+    >>> from pypinyin import pinyin, lazy_pinyin, Style
+    >>> pinyin('中心')  # or pinyin(['中心'])，参数值为列表时表示输入的是已分词后的数据
+    [['zhōng'], ['xīn']]
+    >>> pinyin('中心', style=Style.TONE2, heteronym=True)
+    [['zho1ng', 'zho4ng'], ['xi1n']]
+    >>> lazy_pinyin('中心')  # 不考虑多音字的情况
+    ['zhong', 'xin']
+    >>> lazy_pinyin('战略', v_to_u=True)  # 不使用 v 表示 ü
+    ['zhan', 'lüe']
+\end{lstlisting}
+\begin{algorithm}[H]
+    \caption{使用pypinyin库实现对word文档中多音字的自动标注}
+    \KwIn{原word文档, 多音字字库 \texttt{polyphone\_data}}
+    \KwOut{注音后的word文档}
+    
+    \SetKwFunction{ReadWord}{ReadWord}
+    \SetKwFunction{GetPinyinForRareCharacter}{GetPinyinForRareCharacter}
+    \SetKwFunction{ProcessText}{ProcessText}
+    \SetKwFunction{SaveWord}{SaveWord}
+    
+    \SetKwProg{Fn}{Function}{:}{}
+    
+    \BlankLine
+    读取Word文档内容，获取文本段落 \textbf{paragraphs}\;
+    \ForEach{paragraph \textbf{$\in$ paragraphs}}{
+        \ForEach{character \textbf{$\in$ paragraph}}{
+            \If{character \textbf{$\in$ polyphone\_data}}{
+                添加多音字及其注音到输出段落\;
+            }
+            \Else{
+                直接添加字符到输出段落\;
+            }
+        }
+    }
+    输出注音后的word文档\;
+\end{algorithm}
+\vspace{\baselineskip}
+以下是部分核心代码展示:
+\begin{lstlisting}[caption={pypinyin自动注音的部分核心代码展示}, label={lst:example}]
+    def add_pinyin_to_polyphone_words(paragraphs, polyphone_data):
+    polyphonic_chars = {item['char'] for item in polyphone_data}
+    rare_chars = {item['char'] for item in rare_char_data}
+    output_paragraphs = []
+
+    for paragraph in paragraphs:
+        pinyin_paragraph = pinyin(paragraph, style=Style.TONE)
+        output_paragraph = ""
+        char_index = 0
+        for char in paragraph:
+            if char in polyphonic_chars :
+                output_paragraph += char + '(' + pinyin_paragraph[char_index][0] + ')'
+            elif char in rare_chars:
+                output_paragraph += char + '[' + get_pinyin(char)[0] + ']'
+            else:
+                output_paragraph += char
+            char_index += 1
+        output_paragraphs.append(output_paragraph)
+    return output_paragraphs
+\end{lstlisting}
+
 \subsection{方法二}
 \subsection{UI设计}
 
