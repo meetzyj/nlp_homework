@@ -29,115 +29,34 @@
 %    \title{ \Huge \textbf{{标题}}}
 %\end{center}
 
-\section{模板说明}
-本模板主要适用于一些课程的平时论文以及期末论文，默认页边距为2.5cm，中文宋体，英文Times New Roman，字号为12pt（小四）。
+\section{研究背景}
+信息技术的迅猛发展引领人类社会迈向信息化与智能化新时代，数据呈指数级增长。此背景下，自然语言处理（NLP）作为人机沟通的纽带，其重要性与日俱增。从计算机科学分支跃升至发掘非结构化文本数据潜能、促信息处理高效化和智能化的核心技术，NLP的发展伴随互联网、社交媒体、数字文献等产生的海量数据激增及计算能力建设的飞越，实现了前所未有的技术突破与应用拓宽。
 
-编译方式：\verb|xelatex -> bibtex -> xelatex*2|
+汉语文本处理中，多音字与易错字构成重大障碍。手工筛查耗时且难以保证准确，尤其在大规模文档中，效率与精确性两难求解，愈发突显自动化处理工具的迫切需求。
 
+与此同时，人工智能技术，特别是深度学习领域的飞速进步，如深度神经网络的广泛部署，极大地增强了机器理解和处理自然语言的能力。这些进展不仅仅优化了语音识别、机器翻译等领域，亦为解决自动标注汉字读音等细粒度任务铺平了道路，展现了技术在特定应用场景中的实用性与潜力。
+\section{研究动机}
+本文旨在利用自然语言处理技术，实现对Word文档中多音字与易错字的自动标注。通过构建多音字与易错字的标注模型，实现对文档中多音字与易错字的自动标注，提高文档处理效率，减少人工标注工作量。
+研究动机分为以下两个方面：
+\subsection{实际需求}
+自动注音系统的研发，其首要动机在于解决现实生活中的实际问题，提高人们处理文本的准确性和效率。在演讲准备、教材制作、语言教学、有声书录制等领域，自动为文档加上正确的注音能够显著降低错误发生率，确保发音准确无误，如演讲者念稿时避免误读多音字，确保传达的信息清晰无误。这不仅提升了交流的专业度，还增强了信息接收者的理解体验，使得语言文化传播更为流畅和准确。
 
-默认模板文件由以下四部分组成：
-\begin{itemize}
-    \item \texttt{main.tex} 主文件
-    \item \texttt{reference.bib} 参考文献，使用bibtex
-    \item \texttt{UCASReport.sty} 文档格式控制，包括一些基础的设置，如页眉、标题、姓名等
-    \item \texttt{figures} 放置图片的文件夹
-\end{itemize}
+此外，在教育、科学研究、新闻媒体、法律、医疗健康等领域，文档处理需求日益增长，对文档内容的准确性和专业性提出更高要求。然而，由于汉语的独特性质，如一字多音、同音异义现象的存在，使得中文文档处理面临特别的挑战。手动校对多音字和易错字费时费力，特别是在处理大规模文档时，效率和准确性难以保障。这种情况下，自动化文本处理工具的需求显得尤为迫切。
 
-第一次使用时需前往\texttt{UCASReport.sty} 对标题、姓名、学号、院所、页眉等进行设置，设置完后即可一劳永逸，封面logo亦可替换
+为了便于实际使用，我组成员还设计了用户交互界面，使得用户可以方便地上传文档，即使不会写任何程序，也可以轻松地使用我们的系统进行多音字的自动注音。
+\subsection{能力提升}
+通过这个项目，我们能够将课堂上学到的自然语言处理理论知识与实际问题解决结合起来，加深了对NLP技术本质的理解，如词法分析、语义理解、机器学习模型等概念不再是抽象的文字，而是变成了具体实现代码和技术选型的决策过程。通过处理多音字和易错字的注音任务，我们能够更好地掌握汉语语言特性与语法规则，从而加深对汉语语言学的理解。这个过程需要我们不断思考如何在复杂的语言环境中精确识别多音字的读音，并通过各种算法策略进行纠错。这不仅提升了我们的理论知识，还增强了在实际应用场景中灵活运用所学知识的能力。
 
-默认带有封面页以及目录页，页码从目录页开始
+在项目的实践中，我们有机会接触到多种NLP技术，例如分词、词性标注、语音合成等。
+我们使用python和pytorch编写程序，git进行代码协作与管理，提升了团队成员之间的协作能力，也让我们在编程技能和工程实践上得到了很大的提升。
+每个阶段的方案讨论和调整，都是对我们逻辑思维、问题分析和解决能力的综合考验。
 
-\section{一些插入功能}
-\subsection{插入公式}
-行内公式$v-\varepsilon+\phi=2$。
-
-插入行间公式如\autoref{Euler}：
-\begin{equation}
-    v-\varepsilon+\phi=2
-    \label{Euler}
-\end{equation}
-
-\subsection{插入图片}
-UCAS校徽如\autoref{UCAS}所示，注意这里使用了\verb|~\autoref{}|命令，也就是会自动生成“图”“式”等前缀，无需手动输入。
-
-\begin{figure}[!htbp]
-    \centering
-    \includegraphics[width =.4\textwidth]{figures/ucas_logo.pdf}
-    \caption{中国科学院大学}
-    \label{UCAS}
-\end{figure}
-
-插入上面图片的代码：
-
-\begin{verbatim}
-    \begin{figure}[!htbp]
-        \centering
-        \includegraphics[width =.4\textwidth]{figures/ucas_logo.pdf}
-        \caption{中国科学院大学}
-        \label{UCAS}
-    \end{figure}
-\end{verbatim}
-
-\subsection{插入文本框}
-本模板定义了一个圆角灰底的文本框，使用简化命令\verb|\tbox{}|即可，如果你不喜欢，可以前往 \texttt{UCASReport.sty}对其进行修改。
-
-\tbox{
-    这是一个圆角灰底的文本框
-}
-
-\subsection{插入表格}
-本模板文件如\autoref{doc}所示。
-\begin{table}[!htbp]
-    \centering
-    \begin{tabular}{l  | l}
-    \hline
-        文件名 & 说明 \\
-        \hline
-        \texttt{main.tex}  & 主文件 \\
-        \texttt{reference.bib} & 参考文献 \\
-        \texttt{UCASReport.sty}  & 文档格式控制\\
-        \texttt{figures}  & 图片文件夹 \\
-        \hline
-    \end{tabular}
-    \caption{本模板文件组成}
-    \label{doc}
-\end{table}
-
-%\section{定理环境}
-%\begin{Theorem}
-%\end{Theorem}
-%
-%\begin{Lemma}
-%\end{Lemma}
-%
-%\begin{Corollary}
-%\end{Corollary}
-%
-%\begin{Proposition}
-%\end{Proposition}
-%
-%\begin{Definition}
-%\end{Definition}
-%
-%\begin{Example}
-%\end{Example}
-%
-%\begin{proof}
-%\end{proof}
-
-\subsection{插入参考文献}
-直接使用\verb|\cite{}|即可。
-
-例如：
-
-
-   \textit{ 此处引用了文献\cite{0Isaac}。此处引用了文献\cite{2016The}}
-
-
-引用过的文献会自动出现在参考文献中。
-
-\section{写在最后}
-\subsection{发布地址}
+此外，这个作业让我们更深入地体会到了科研的严谨性与创新性。为了实现高精度的注音功能，我们需要广泛查阅文献，
+分析现有的多音字处理方案，并训练了自己的模型。在这个过程中，我们不仅学会了如何全面理解一个研究问题，
+还培养了在面对复杂问题时，能够从多角度提出创新性解决方案的能力。为使工具易于使用且效果直观，在ui界面时我们不得不站在用户的角度思考，
+提升了我们的产品设计思维。
+\section{技术路线}
+\subsection{使用pypinyin库}
 \begin{itemize}
     \item Github: \url{https://github.com/jweihe/UCAS_Latex_Template}
     \item Overleaf:  \url{https://www.overleaf.com/latex/templates/UCASke-cheng-lun-wen-mo-ban/bcwvxncqffkw}
