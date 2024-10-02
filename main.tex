@@ -1,6 +1,9 @@
 %!TeX program = xelatex
 \documentclass[12pt,hyperref,a4paper,UTF8]{ctexart}
 \usepackage{UCASReport}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
 
 %%-------------------------------正文开始---------------------------%%
 \begin{document}
@@ -28,7 +31,7 @@
 %\begin{center}
 %    \title{ \Huge \textbf{{标题}}}
 %\end{center}
-
+\section{摘要}
 \section{研究背景}
 信息技术的迅猛发展引领人类社会迈向信息化与智能化新时代，数据呈指数级增长。此背景下，自然语言处理（NLP）作为人机沟通的纽带，其重要性与日俱增。从计算机科学分支跃升至发掘非结构化文本数据潜能、促信息处理高效化和智能化的核心技术，NLP的发展伴随互联网、社交媒体、数字文献等产生的海量数据激增及计算能力建设的飞越，实现了前所未有的技术突破与应用拓宽。
 
@@ -57,15 +60,29 @@
 提升了我们的产品设计思维。
 \section{技术路线}
 \subsection{使用pypinyin库}
-\begin{itemize}
-    \item Github: \url{https://github.com/jweihe/UCAS_Latex_Template}
-    \item Overleaf:  \url{https://www.overleaf.com/latex/templates/UCASke-cheng-lun-wen-mo-ban/bcwvxncqffkw}
-\end{itemize}
+\subsection{方法二}
+\subsection{UI设计}
+
+\section{成果展示}
+
+\section{小组分工}
+\begin{longtable}{>{\centering\arraybackslash}p{0.4\textwidth} >{\centering\arraybackslash}p{0.4\textwidth}} % 设置表格宽度及比例
+    \toprule
+    \textbf{工作内容} & \textbf{成员名称} \\ % 表头
+    \midrule
+    主逻辑代码实现 & 张志成，江震南 \\
+    代码优化调整 & 左斌斌，鑫攀​ \\
+    UI 代码实现 & 曾楠馨 \\
+    报告撰写 & 朱英健，黄少平 \\
+    Pre &  \\
+    清洗和收集数据 &  \\
+    \bottomrule
+\end{longtable}
 
 %%----------- 参考文献 -------------------%%
 %在reference.bib文件中填写参考文献，此处自动生成
 
-\reference
+% \reference
 
 
 \end{document}

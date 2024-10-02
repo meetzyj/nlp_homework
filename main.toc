@@ -1,6 +1,11 @@
-\contentsline {section}{\numberline {1}研究背景}{3}{section.1}%
-\contentsline {section}{\numberline {2}研究动机}{3}{section.2}%
-\contentsline {subsection}{\numberline {2.1}实际需求}{3}{subsection.2.1}%
-\contentsline {subsection}{\numberline {2.2}能力提升}{4}{subsection.2.2}%
-\contentsline {section}{\numberline {3}技术路线}{4}{section.3}%
-\contentsline {subsection}{\numberline {3.1}发布地址}{4}{subsection.3.1}%
+\contentsline {section}{\numberline {1}摘要}{3}{section.1}%
+\contentsline {section}{\numberline {2}研究背景}{3}{section.2}%
+\contentsline {section}{\numberline {3}研究动机}{3}{section.3}%
+\contentsline {subsection}{\numberline {3.1}实际需求}{3}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}能力提升}{4}{subsection.3.2}%
+\contentsline {section}{\numberline {4}技术路线}{4}{section.4}%
+\contentsline {subsection}{\numberline {4.1}使用pypinyin库}{4}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}方法二}{4}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}UI设计}{4}{subsection.4.3}%
+\contentsline {section}{\numberline {5}成果展示}{4}{section.5}%
+\contentsline {section}{\numberline {6}小组分工}{4}{section.6}%
