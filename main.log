@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.10.1)  9 OCT 2024 23:36
+This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.10.1)  11 OCT 2024 12:27
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1258,8 +1258,8 @@ Package rerunfilecheck Warning: File `main.out' has changed.
 (rerunfilecheck)                or use package `bookmark'.
 
 Package rerunfilecheck Info: Checksums for `main.out':
-(rerunfilecheck)             Before: FCB52117B1008113818C61010A0BFFCA;1132
-(rerunfilecheck)             After:  FBC9BD498B6E81965CFFF5AEC21872B1;1164.
+(rerunfilecheck)             Before: FBC9BD498B6E81965CFFF5AEC21872B1;1164
+(rerunfilecheck)             After:  9AF5FADD28CF928FD8D2F421744764EA;1088.
  ) 
 Here is how much of TeX's memory you used:
  34123 strings out of 475752
