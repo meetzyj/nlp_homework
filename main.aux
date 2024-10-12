@@ -10,16 +10,44 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.2}学生能力培养}{4}{subsection.3.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {4}技术路线}{4}{section.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.1}方法一：使用pypinyin库}{4}{subsection.4.1}\protected@file@percent }
-\newlabel{lst:example}{{1}{4}{python-pinyin的使用示例}{lstlisting.1}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {1}python-pinyin的使用示例}{4}{lstlisting.1}\protected@file@percent }
 \@writefile{loa}{\contentsline {algocf}{\numberline {1}{\ignorespaces 使用pypinyin库实现对word文档中多音字的自动标注}}{5}{algocf.1}\protected@file@percent }
-\newlabel{lst:example}{{2}{5}{pypinyin自动注音的部分核心代码展示}{lstlisting.2}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {2}pypinyin自动注音的部分核心代码展示}{5}{lstlisting.2}\protected@file@percent }
-\gdef \LT@i {\LT@entry 
-    {1}{194.09486pt}\LT@entry 
-    {1}{194.09486pt}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}方法二}{6}{subsection.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}方法三：使用大模型api实现端到端注音}{6}{subsection.4.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}UI设计}{6}{subsection.4.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5}小组分工}{6}{section.5}\protected@file@percent }
-\gdef \@abspage@last{7}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}方法二：使用LSTM神经网络模型}{5}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.1}数据集构建}{6}{subsubsection.4.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{一、爬虫+pypinyin库:（数据集构建的代码为 method2/get\_data.py）}{6}{paragraph*.2}\protected@file@percent }
+\newlabel{lst:example}{{1}{6}{方法一数据预处理}{lstlisting.1}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1}方法一数据预处理}{6}{lstlisting.1}\protected@file@percent }
+\newlabel{lst:example}{{2}{6}{方法一多音字匹配及拼音注音}{lstlisting.2}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {2}方法一多音字匹配及拼音注音}{6}{lstlisting.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{二、大模型构建数据集}{7}{paragraph*.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces 大模型生成错误样例1}}{8}{figure.1}\protected@file@percent }
+\newlabel{fig:image1}{{1}{8}{大模型生成错误样例1}{figure.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces 大模型生成错误样例2}}{8}{figure.2}\protected@file@percent }
+\newlabel{fig:image2}{{2}{8}{大模型生成错误样例2}{figure.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{三、使用 train.csv 数据集 + 人工处理}{8}{paragraph*.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces train.csv数据集样例}}{9}{figure.3}\protected@file@percent }
+\newlabel{fig:enter-label}{{3}{9}{train.csv数据集样例}{figure.3}{}}
+\@writefile{toc}{\contentsline {paragraph}{四、使用论文中开源数据集}{9}{paragraph*.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces train big.sent}}{9}{figure.4}\protected@file@percent }
+\newlabel{fig:image3}{{4}{9}{train big.sent}{figure.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces train big.lb }}{9}{figure.5}\protected@file@percent }
+\newlabel{fig:image4}{{5}{9}{train big.lb}{figure.5}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.2}DisambiguationLSTM神经网络模型}{9}{subsubsection.4.2.2}\protected@file@percent }
+\newlabel{lst:example}{{3}{10}{DisambiguationLSTM神经网络模型实现代码}{lstlisting.3}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {3}DisambiguationLSTM神经网络模型实现代码}{10}{lstlisting.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.3}易读错字注音}{11}{subsubsection.4.2.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces 汉字单字字频数据集}}{11}{figure.6}\protected@file@percent }
+\newlabel{fig:fig4}{{6}{11}{汉字单字字频数据集}{figure.6}{}}
+\newlabel{lst:example}{{4}{11}{读取文档内容实现代码}{lstlisting.4}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {4}读取文档内容实现代码}{11}{lstlisting.4}\protected@file@percent }
+\newlabel{lst:example}{{5}{12}{拼音查找函数实现代码}{lstlisting.5}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {5}拼音查找函数实现代码}{12}{lstlisting.5}\protected@file@percent }
+\newlabel{lst:example}{{6}{12}{处理文本并添加注音实现代码}{lstlisting.6}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {6}处理文本并添加注音实现代码}{12}{lstlisting.6}\protected@file@percent }
+\newlabel{lst:example}{{7}{12}{注音处理与文件保存实现代码}{lstlisting.7}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {7}注音处理与文件保存实现代码}{12}{lstlisting.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}方法三：使用大模型api实现端到端注音}{13}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}UI设计}{14}{subsection.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}小组分工}{14}{section.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces 工作内容与成员名称}}{14}{table.1}\protected@file@percent }
+\newlabel{tab:work_distribution}{{1}{14}{工作内容与成员名称}{table.1}{}}
+\gdef \@abspage@last{14}

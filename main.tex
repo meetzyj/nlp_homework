@@ -7,6 +7,8 @@
 \usepackage{listings} % 加载 listings 包
 \usepackage{color}
 \usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\usepackage{listings} 
+\usepackage{float}
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
@@ -95,7 +97,7 @@
 \section{技术路线}
 \subsection{方法一：使用pypinyin库}
 python-pinyin是一个用于将汉字转换为拼音的python库,其开源地址为\url{https://github.com/mozillazg/python-pinyin}。它支持多种拼音风格，包括声调和无声调。我们可以使用它来实现对文档中多音字的自动标注。
-\begin{lstlisting}[caption={python-pinyin的使用示例}, label={lst:example}]
+\begin{lstlisting}
     >>> from pypinyin import pinyin, lazy_pinyin, Style
     >>> pinyin('中心')  # or pinyin(['中心'])，参数值为列表时表示输入的是已分词后的数据
     [['zhōng'], ['xīn']]
@@ -134,7 +136,7 @@ python-pinyin是一个用于将汉字转换为拼音的python库,其开源地址
 \end{algorithm}
 \vspace{\baselineskip}
 以下是部分核心代码展示:
-\begin{lstlisting}[caption={pypinyin自动注音的部分核心代码展示}, label={lst:example}]
+\begin{lstlisting}
     def add_pinyin_to_polyphone_words(paragraphs, polyphone_data):
     polyphonic_chars = {item['char'] for item in polyphone_data}
     rare_chars = {item['char'] for item in rare_char_data}
@@ -156,7 +158,230 @@ python-pinyin是一个用于将汉字转换为拼音的python库,其开源地址
     return output_paragraphs
 \end{lstlisting}
 
-\subsection{方法二}
+\subsection{方法二：使用LSTM神经网络模型}
+在本节中我们将简要介绍如何训练和使用LSTM模型进行多音字和难见字注音。
+\subsubsection{数据集构建}
+训练一个神经网络往往需要一个高质量的特定数据集，为了实现准确的多音字和难字注音目标，方法二主要利用了四类数据集，其中有些是我们自己构建的，而有些是我们直接引用前人构建的相关数据集，最后分别对不同数据集进行了简单的优势与不足分析。
+\paragraph{一、爬虫+pypinyin库:（数据集构建的代码为 method2/get\_data.py）}%\_是转义字符
+该项目主要分为以下几个步骤：
+\begin{enumerate}
+    \item \textbf{数据采集}：本项目使用了爬虫 + Pypinyin 库自动注音的方式获取了训练所需的多音字数据集。首先，我们使用爬虫技术从公开网站上获取某个月人民日报的中文文本数据，规模大约为两百万文字（3.7 MB）。爬取到的文本数据包含丰富的语料库，涵盖了多种语境下的多音字，适合作为中文多音字的训练集。我们通过对爬取的文本数据进行处理，并借助 Python 编程语言与Pypinyin相关库，自动为多音字添加拼音注释，最后构建出一个可以用于训练 LSTM 模型的标准化数据集。
+    \item \textbf{数据预处理}：使用 Python 的正则表达式对爬取的文本进行清洗与分句处理。以下是部分核心代码展示:
+  \begin{lstlisting}[caption={方法一数据预处理}, label={lst:example}]
+      # 读取docx文件
+      doc = Document('data/train_pinyin_file.docx')  # 替换为你的文件名
+      # 遍历文档中的段落
+      for para in doc.paragraphs:
+          text = para.text
+          # 使用标点符号分隔句子
+          sentences = re.split(r'[。；，]', text)
+  \end{lstlisting}
+    \item \textbf{多音字匹配及拼音注音}：使用 pypinyin 库，我们可以自动为文本中的每个汉字生成拼音。对于多音字，我们会根据语境信息选择正确的发音并附加注音。对于每个句子，正则表达式 \texttt{r'(\textbackslash w+)((\textbackslash w+))'}被用来提取带有拼音的词语，并将其与句子中出现的多音字进行对应。同时为了保证数据多样性和合理性，每个多音字的相同拼音不会在数据集中重复出现超过 10 次。以下是部分核心代码展示:
+  \begin{lstlisting}[caption={方法一多音字匹配及拼音注音}, label={lst:example}]
+  for sentence in sentences:
+      matches = re.findall(r'(\w+)((\w+))', sentence)
+      for word, pronunciation in matches:
+      # 清理句子中的注音部分
+      cleaned_sentence = re.sub(r'\(.*?\)', '', sentence).strip()
+      
+      # 判断该多音字及其拼音是否已在数据集中存在
+      if word in train_data:
+          existing_pronunciations = [entry[2] for entry in train_data[word]]
+          if existing_pronunciations.count(pronunciation) > 10:
+              continue  # 跳过发音已存超过 5 次的条目
+      
+      # 只处理单个汉字的多音字
+      if len(word) > 1:
+          continue
+  
+      # 将新词条加入数据集
+      if word not in train_data:
+          train_data[word] = []
+      train_data[word].append((cleaned_sentence, word, pronunciation))
+  \end{lstlisting}
+  \item \textbf{数据集存储}：在数据集中，每个汉字的拼音都会与它所在的句子一起保存，确保上下文信息不丢失。我们为每个多音字构建一个包含句子、拼音和汉字的结构化条目，存储到 JSON 文件中，形成训练数据集，数据结构如下所示：
+  
+  
+  % 创建高亮文本框
+  \begin{tcolorbox}
+    "了": [\\
+      ('他已经回来了', '了', 'le'),\\
+      ('你去了哪里？', '了', 'le'),\\
+      ('事情终于结束了', '了', 'le'),\\
+      ('我吃完饭了', '了', 'le'),\\
+      ('他笑了起来', '了', 'le'),\\
+      ('问题解决了', '了', 'le'),\\
+      ('我早就知道了', '了', 'le'),\\
+      ('那件事了了', '了', 'liǎo'),\\
+      ('他什么都不明了', '了', 'liǎo'),\\
+      ('事情很快了结', '了', 'liǎo'),\\
+      ],
+  \end{tcolorbox}
+  \end{enumerate}
+  \paragraph{二、大模型构建数据集}
+  \indent 随着深度学习技术的飞速发展，大型预训练模型（Large Language Models, LLMs）如GPT系列、BERT等在自然语言处理（NLP）领域取得了显著成就。然而，为了进一步微调模型以适应特定任务，往往需要高质量的领域数据集，因此本文高效地利用大语言模型来构建多音字数据集。\\
+  \indent 通过大模型自动构建数据集需要进行prompt设计，并在prompt结合样例，即让大模型进行少样本学习（few shot learning）。prompt样例如下所示：
+  % 创建高亮文本框
+  \begin{tcolorbox}
+    '六': ('liù', 'lù'), '切': ('qiē', 'qiè'), '分': ('fēn', 'fèn'),... 请为这些多音字，每个字生成 10 个句子，样式为： "少": [ ("少年的时光很宝贵", "少", "shào"), ("少数服从多数是原则", "少", "shǎo"), ("少林寺的武功很厉害", "少", "shào"), ("他少言寡语", "少", "shǎo"), ("少年强则国强", "少", "shào"), ("少部分人持有异议", "少", "shǎo"), ("他少不更事", "少", "shào"), ("少安毋躁，慢慢来", "少", "shǎo"), ("少年的志向很远大", "少", "shào"), ("少一点抱怨，多一点行动", "少", "shǎo") ], 
+  \end{tcolorbox}
+  \indent 尽管大语言模型具有很强的语言理解和生成能力，但不可避免地会出现幻觉现象，生产错误的注音样例，如下为两个错误输出样例：
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/image.png} % 替换为第一张图片的路径
+        \caption{大模型生成错误样例1}
+        \label{fig:image1}
+    \end{minipage}
+    \hspace{0.05\textwidth} % 两张图片之间的水平间隔
+    \begin{minipage}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/image1.png} % 替换为第二张图片的路径
+        \caption{大模型生成错误样例2}
+        \label{fig:image2}
+    \end{minipage}
+\end{figure}
+\paragraph{三、使用 train.csv 数据集 + 人工处理}
+\indent 我们在GitHub上(\url{https://github.com/Jackiexiao/tts-frontend-dataset})下载了开源数据集train.csv，然后处理利用正则表达式实现拼音提取与文字提取，同时为了保障训练数据的多样性，我们平衡了每个读音样例的数量。 （实际中相同的发音可能限制最多 10 个或20个），如下图所示：
+\begin{figure}[H]%通过引入 float 包，可以使用 [H] 参数强制图片出现在当前位置。
+    \centering
+    \includegraphics[width=0.5\linewidth]{figures/image2.png}
+    \caption{train.csv数据集样例}
+    \label{fig:enter-label}
+\end{figure}
+\paragraph{四、使用论文中开源数据集}
+我们参考了论文《CVTE-Poly: A New Benchmark for Chinese Polyphone Disambiguation》，并从\url{https://github.com/NewZsh/polyphone} GitHub仓库中下载了训练数据集，分别为train big.sent和train big.lb两个文件，前者为训练文本数据，后者训练文本对应的多音字注音数据，并利用两个下划线标记了需要注音的字。s数据格式如下图所示：
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/image3.png} % 替换为第一张图片的路径
+        \caption{train big.sent}
+        \label{fig:image3}
+    \end{minipage}
+    \hspace{0.05\textwidth} % 两张图片之间的水平间隔
+    \begin{minipage}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/image4.png} % 替换为第二张图片的路径
+        \caption{train big.lb }
+        \label{fig:image4}
+    \end{minipage}
+\end{figure}
+\subsubsection{DisambiguationLSTM神经网络模型}
+在训练过程中，该方法利用了DisambiguationLSTM神经网络模型，每个网络是一层 Embedding + LSTM，并为每个字（word）训练一个 DisambiguationLSTM ， 然后使用 nn.ModuleDict 的方式做模型集成，最后在测试阶段，测试集中的每个词都可以使用对应的模型做推理，模型实现代码细节如下：
+\begin{lstlisting}[caption={DisambiguationLSTM神经网络模型实现代码}, label={lst:example}]
+class DisambiguationLSTM(nn.Module):
+    def __init__(self, n_word, word_dim, word_hidden, n_pronounce):
+        super(DisambiguationLSTM, self).__init__()
+        self.word_embedding = nn.Embedding(n_word, word_dim)
+        self.lstm = nn.LSTM(input_size=word_dim, hidden_size=word_hidden, batch_first=True, bidirectional=True)
+        self.linear1 = nn.Linear(word_hidden*2, n_pronounce)
+    def forward(self, x):
+        x = self.word_embedding(x)
+        x = x.unsqueeze(0)      # x.size() : (1,5,100)
+        x, _ = self.lstm(x)     # x.size(): (1,5,256)
+        x_out = x[:, -1, :]     # 全连接层的输入为神经网络最后一层最后一个time step的输出
+        x = self.linear1(x_out)     # x.size() : (1,2)
+        return x  详细解释一下这个网络的原理
+\end{lstlisting}
+这个 DisambiguationLSTM 是一个基于 PyTorch 的 LSTM（长短期记忆网络）模型，专门用于处理序列数据。以下是对该模型的详细解释：
+\begin{enumerate}
+  \item \textbf{Embedding 层 (self.word\_embedding)：}
+  \begin{itemize}
+  \item 作用：将输入的单词序列转换成低维的稠密向量表示，通常称为“词嵌入”。
+  \item 每个单词在词汇表中的索引，维度为 (batch\_size, sequence\_length)，即每一行表示一个句子或单词序列。
+  \item 输出：将每个索引转换成一个 word\_dim 维度的向量，输出的维度为 (batch\_size, sequence\_length, word\_dim)，即每个单词被转换成一个 word\_dim 维的向量。
+\end{itemize}
+  \item \textbf{LSTM 层 (self.lstm)：}
+  \begin{itemize}
+  \item 作用：LSTM 是一种特殊的循环神经网络（RNN），能够捕捉序列数据中的长期依赖关系。它通过“记忆门”机制，能够有效避免长时间依赖导致的梯度消失问题。
+  \item input\_size=word\_dim：表示 LSTM 接受的输入向量的维度，即每个单词的嵌入维度。
+  \item hidden\_size=word\_hidden：LSTM 输出的隐藏层状态的维度大小。
+  \item bidirectional=True：表示 LSTM 是双向的，即它同时考虑了输入序列的正向和反向，因此其输出的维度会是隐藏层大小的两倍（正向和反向连接起来的结果）。
+  \item 输出：
+  \begin{itemize}
+  \item x: LSTM 层的输出，形状为 (batch\_size, sequence\_length, word\_hidden * 2)，其中 word\_hidden * 2 表示双向 LSTM 输出的维度。
+  \item \_（不需要的变量）：这是 LSTM 的隐藏状态和记忆状态，因为我们只关心每个时间步的输出，不需要显式使用隐藏状态。
+  \end{itemize}
+\end{itemize}
+  \item \textbf{全连接层 (self.linear1)：}
+  \begin{itemize}
+  \item 作用：将 LSTM 层的输出映射到目标分类空间中，即预测多音字的发音类别。
+  \item LSTM 的最后一个时间步的输出（即整个序列的最后一个单词的隐状态）。
+  \item n\_pronounce 维的输出，表示预测的类别（发音）。
+\end{itemize}
+\end{enumerate}
+\subsubsection{易读错字注音}
+为了有效地利用规则信息给文本中的易读错字进行注音，我们整理了一个汉字单字字频数据集，规模大小为12041个汉字。这个数据集来源于将来自汉字单字字频总表的原始数据进行处理，原始数据文件（\url{https://lingua.mtsu.edu/chinese-computing/statistics/char/list.php?Which=TO}）包括以下词条：其中第四列是: Cumulative frequency in percentile;累计频率(\%)，将累计频率从高到低排列，可以根据需要设置难字的阈值，如将常用6000字以外的词当作难字进行注音。
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/image5.png}
+    \caption{汉字单字字频数据集}
+    \label{fig:fig4}
+\end{figure}
+\begin{enumerate}
+    \item \textbf{读取文档内容}\\
+  通过 read\_from\_word\_file 函数读取指定的 Word 文件，并将每个段落的文本内容存储在列表中。这个函数调用了 Python docx 库来处理 Word 文档：
+    \begin{lstlisting}[caption={读取文档内容实现代码}, label={lst:example}]
+  def read_from_word_file(file_path):
+      doc = Document(file_path)
+      return [para.text for para in doc.paragraphs]
+  \end{lstlisting}
+    \item \textbf{拼音查找函数}\\
+    通过 get\_pinyin 函数从 rare\_char.json 文件中查找指定汉字的拼音，并返回对应的拼音值：
+    \begin{lstlisting}[caption={拼音查找函数实现代码}, label={lst:example}]
+  def get_pinyin(char, rare_char_data):
+      for item in rare_char_data:
+          if item['char'] == char:
+              return item['pinyin']
+      return None  
+  \end{lstlisting}
+    \item \textbf{处理文本并添加注音}\\
+    add\_pinyin\_to\_polyphone\_words 函数负责处理每一段文本，将文本中的多音字和生僻字添加拼音注音：
+    \begin{lstlisting}[caption={处理文本并添加注音实现代码}, label={lst:example}]
+  def add_pinyin_to_polyphone_words(paragraphs, polyphone_data, rare_char_data):
+      polyphonic_chars = {item['char'] for item in polyphone_data}
+      rare_chars = {item['char'] for item in rare_char_data}
+      output_paragraphs = []
+      for paragraph in paragraphs:
+          output_paragraph = ""
+          char_index = 0
+          for char in paragraph:
+              if char in rare_chars:
+                  output_paragraph += char + '[' + get_pinyin(char, rare_char_data)[0] + ']'
+              else:
+                  output_paragraph += char
+              char_index += 1
+          output_paragraphs.append(output_paragraph)
+      return output_paragraphs
+  \end{lstlisting}
+    \item \textbf{主函数：注音处理与文件保存}\\
+    pinyin\_nan 函数是主控制函数，它负责从文档中读取文本，处理文本并为多音字和生僻字添加拼音，最后将结果保存到一个新的 Word 文档中。
+    \begin{lstlisting}[caption={注音处理与文件保存实现代码}, label={lst:example}]
+  def pinyin_nan(input_file='method1/nlp_test.docx', output_doc_path='output_with_pinyin.docx', polyphone='data/polyphone.json', rare_char='data/rare_char.json', level=3000):
+      with open(polyphone, 'r', encoding='utf-8') as file:
+          polyphone_data = json.load(file)
+      with open(rare_char, 'r', encoding='utf-8') as file:
+          rare_char_data = json.load(file)
+          rare_char_data = rare_char_data[level:]
+  
+      input_paragraphs_from_word = read_from_word_file(input_file)
+      output_paragraphs_with_pinyin = add_pinyin_to_polyphone_words(input_paragraphs_from_word, polyphone_data, rare_char_data)
+  
+      output_doc = Document()
+      for paragraph in output_paragraphs_with_pinyin:
+          p = output_doc.add_paragraph(paragraph)
+          p.paragraph_format.first_line_indent = Pt(21)  # 设置首行缩进
+          for run in p.runs:
+              run.font.name = '宋体'
+              run.font.size = Pt(12)  # 设置字体大小为小四号（12磅）
+  
+      output_doc.save(output_doc_path)
+  \end{lstlisting}
+\end{enumerate}
+
 \subsection{方法三：使用大模型api实现端到端注音}
 在这个方法中，我们使用deepseek的大模型api实现端到端的注音功能，
 具体的实现方法为：
@@ -180,20 +405,25 @@ prompt具体来说使用了少样本示例的方法进行提示，激发了模�
 \subsection{UI设计}
 
 \section{小组分工}
-\begin{longtable}{>{\centering\arraybackslash}p{0.4\textwidth} >{\centering\arraybackslash}p{0.4\textwidth}} % 设置表格宽度及比例
-    \toprule
-    \textbf{工作内容} & \textbf{成员名称} \\ % 表头
-    \midrule
-    method1代码实现 & 张志成 \\
-    method2代码实现 & 张志成，江震南，左斌斌 \\
-    method3代码实现 & 郝锐，邱骏坤 \\
-    难字实现 & 左斌斌，孟鑫攀​ \\
-    UI实现 & 曾楠馨，沙霖 \\
-    报告撰写 & 朱英健，黄少平 \\
-    PPT制作与汇报展示 & 柏天佑 \\
-    测试与量化指标 & 江震南，龚子俊 \\
-    \bottomrule
-\end{longtable}
+\begin{table}[H] % 使用 table 环境并设置浮动选项为 H
+    \centering
+    \begin{tabular}{>{\centering\arraybackslash}p{0.4\textwidth} >{\centering\arraybackslash}p{0.4\textwidth}} % 设置表格宽度及比例
+        \toprule
+        \textbf{工作内容} & \textbf{成员名称} \\ % 表头
+        \midrule
+        method1代码实现 & 张志成 \\
+        method2代码实现 & 张志成，江震南，左斌斌 \\
+        method3代码实现 & 郝锐，邱骏坤 \\
+        难字实现 & 左斌斌，孟鑫攀 \\
+        UI实现 & 曾楠馨，沙霖 \\
+        报告撰写 & 朱英健，黄少平 \\
+        PPT制作与汇报展示 & 柏天佑 \\
+        测试与量化指标 & 江震南，龚子俊 \\
+        \bottomrule
+    \end{tabular}
+    \caption{工作内容与成员名称}
+    \label{tab:work_distribution}
+\end{table}
 
 %%----------- 参考文献 -------------------%%
 %在reference.bib文件中填写参考文献，此处自动生成
