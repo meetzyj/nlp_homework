@@ -10,6 +10,9 @@
 \usepackage{listings} 
 \usepackage{float}
 \usepackage[table]{xcolor} 
+% \usepackage{subfigure}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
@@ -69,14 +72,24 @@
 %    \title{ \Huge \textbf{{标题}}}
 %\end{center}
 \section{摘要}
-在日常生活中，汉语文本处理中的多音字和易错字问题出现的十分频繁，本文旨在利用自然语言处理技术，实现对Word文档中多音字与易错字的自动标注。
-本文主要使用了三种方法来解决自动注音问题，分别是使用pypinyin库、训练LSTM神经网络和使用大语言模型deepseek的api。
-我们小组采用了包括爬虫，大模型aigc在内的四种方法来构建高质量的多音字数据集，用于训练LSTM模型。最终LSTM在我们设计的benchmark上取得了优秀的成绩。
-为了有效地利用规则信息给文本中的易读错字进行注音，我们整理了一个汉字单字
-字频数据集，规模大小为 12041 个汉字。
-最后，我们小组设计了一个基于Flask的ui界面，
-通过清晰的界面和直观的交互，用户可以轻松上传
-文件和输入文本，获取处理结果。
+% 在日常生活中，汉语文本处理中的多音字和易错字问题出现的十分频繁，本文旨在利用自然语言处理技术，实现对Word文档中多音字与易错字的自动标注。
+% 本文主要使用了三种方法来解决自动注音问题，分别是使用pypinyin库、训练LSTM神经网络和使用大语言模型deepseek的api。
+% 我们小组采用了包括爬虫，大模型aigc在内的四种方法来构建高质量的多音字数据集，用于训练LSTM模型。最终LSTM在我们设计的benchmark上取得了优秀的成绩。
+% 为了有效地利用规则信息给文本中的易读错字进行注音，我们整理了一个汉字单字
+% 字频数据集，规模大小为 12041 个汉字。
+% 最后，我们小组设计了一个基于Flask的ui界面，
+% 通过清晰的界面和直观的交互，用户可以轻松上传
+% 文件和输入文本，获取处理结果。
+该项目是NLP第四小组的自动注音项目，我们开发了一套系统，实现对文档中的多音字和疑难字的自动注音。具体来说，我们的贡献包括:
+\begin{itemize}
+    \item 构建了一个针对docx文档的自动注音训练、测试和评估的完整pipeline。
+    \item 采用了pypinyin库、训练LSTM神经网络和使用LLM agent三种方法，实现文本的自动注音。
+    \item 创建了四种数据集，探讨数据集质量对LSTM网络在解决自动注音问题中的关键作用。
+    \item 通过实验发现，无论是深度学习还是LLM agent，分词和语义理解在自动注音的成功率中发挥了重要作用。
+    \item 整理了一个汉字单字字频数据集，有效利用规则信息为文本中的易读错字提供注音。
+    \item 构建了常规样例和困难样例，发现 LSTM 网络和 LLM agent 都取得了优秀的表现，其中，LLM 在困难样例下表现最佳。
+    \item 设计了一个基于Flask的用户界面，通过清晰的界面和直观的交互，用户可以轻松上传文件和输入文本，获取处理结果。
+\end{itemize}
 \section{研究背景}
 信息技术的迅猛发展引领人类社会迈向信息化与智能化新时代，数据呈指数级增长。此背景下，自然语言处理（NLP）作为人机沟通的纽带，其重要性与日俱增。从计算机科学分支跃升至发掘非结构化文本数据潜能、促信息处理高效化和智能化的核心技术，NLP的发展伴随互联网、社交媒体、数字文献等产生的海量数据激增及计算能力建设的飞越，实现了前所未有的技术突破与应用拓宽。
 
@@ -178,7 +191,7 @@ python-pinyin是一个用于将汉字转换为拼音的python库,其开源地址
     \item \textbf{数据预处理}：使用 Python 的正则表达式对爬取的文本进行清洗与分句处理。以下是部分核心代码展示:
   \begin{lstlisting}[caption={方法一数据预处理}, label={lst:example}]
       # 读取docx文件
-      doc = Document('data/train_pinyin_file.docx')  # 替换为你的文件名
+      doc = Document('data/train_pinyin_file.docx')
       # 遍历文档中的段落
       for para in doc.paragraphs:
           text = para.text
@@ -234,7 +247,7 @@ python-pinyin是一个用于将汉字转换为拼音的python库,其开源地址
   \begin{tcolorbox}
     '六': ('liù', 'lù'), '切': ('qiē', 'qiè'), '分': ('fēn', 'fèn'),... 请为这些多音字，每个字生成 10 个句子，样式为： "少": [ ("少年的时光很宝贵", "少", "shào"), ("少数服从多数是原则", "少", "shǎo"), ("少林寺的武功很厉害", "少", "shào"), ("他少言寡语", "少", "shǎo"), ("少年强则国强", "少", "shào"), ("少部分人持有异议", "少", "shǎo"), ("他少不更事", "少", "shào"), ("少安毋躁，慢慢来", "少", "shǎo"), ("少年的志向很远大", "少", "shào"), ("少一点抱怨，多一点行动", "少", "shǎo") ], 
   \end{tcolorbox}
-  \indent 尽管大语言模型具有很强的语言理解和生成能力，但不可避免地会出现幻觉现象，生产错误的注音样例，如下为两个错误输出样例：
+  \indent 尽管大语言模型具有很强的语言理解和生成能力，但不可避免地会出现幻觉现象，生产错误的注音样例，图\ref{fig91}和图\ref{fig92}为两个错误输出样例：
 
 \begin{figure}[htbp]
     \centering
@@ -242,26 +255,26 @@ python-pinyin是一个用于将汉字转换为拼音的python库,其开源地址
         \centering
         \includegraphics[width=\textwidth]{figures/image.png} % 替换为第一张图片的路径
         \caption{大模型生成错误样例1}
-        \label{fig:image1}
+        \label{fig91}
     \end{minipage}
     \hspace{0.05\textwidth} % 两张图片之间的水平间隔
     \begin{minipage}[b]{0.45\textwidth}
         \centering
         \includegraphics[width=\textwidth]{figures/image1.png} % 替换为第二张图片的路径
         \caption{大模型生成错误样例2}
-        \label{fig:image2}
+        \label{fig92}
     \end{minipage}
 \end{figure}
 \paragraph{三、使用 train.csv 数据集 + 人工处理}\leavevmode\\
-\indent 我们在GitHub上(\url{https://github.com/Jackiexiao/tts-frontend-dataset})下载了开源数据集train.csv，然后处理利用正则表达式实现拼音提取与文字提取，同时为了保障训练数据的多样性，我们平衡了每个读音样例的数量。 （实际中相同的发音可能限制最多 10 个或20个），如下图所示：
+\indent 我们在GitHub上(\url{https://github.com/Jackiexiao/tts-frontend-dataset})下载了开源数据集train.csv，然后处理利用正则表达式实现拼音提取与文字提取，同时为了保障训练数据的多样性，我们平衡了每个读音样例的数量。 （实际中相同的发音可能限制最多 10 个或20个），如图\ref{fig93}所示：
 \begin{figure}[H]%通过引入 float 包，可以使用 [H] 参数强制图片出现在当前位置。
     \centering
     \includegraphics[width=0.5\linewidth]{figures/image2.png}
     \caption{train.csv数据集样例}
-    \label{fig:enter-label}
+    \label{fig93}
 \end{figure}
 \paragraph{四、使用论文中开源数据集}\leavevmode\\
-\indent 我们参考了论文《CVTE-Poly: A New Benchmark for Chinese Polyphone Disambiguation》，并从\url{https://github.com/NewZsh/polyphone} GitHub仓库中下载了训练数据集，分别为train big.sent和train big.lb两个文件，前者为训练文本数据，后者训练文本对应的多音字注音数据，并利用两个下划线标记了需要注音的字。s数据格式如下图所示：
+\indent 我们参考了论文《CVTE-Poly: A New Benchmark for Chinese Polyphone Disambiguation》，并从\url{https://github.com/NewZsh/polyphone} GitHub仓库中下载了训练数据集，分别为train big.sent和train big.lb两个文件，前者为训练文本数据，后者训练文本对应的多音字注音数据，并利用两个下划线标记了需要注音的字。数据格式如图\ref{fig:image3}和图\ref{fig:image4}所示：
 \begin{figure}[htbp]
     \centering
     \begin{minipage}[b]{0.45\textwidth}
@@ -289,11 +302,11 @@ class DisambiguationLSTM(nn.Module):
         self.linear1 = nn.Linear(word_hidden*2, n_pronounce)
     def forward(self, x):
         x = self.word_embedding(x)
-        x = x.unsqueeze(0)      # x.size() : (1,5,100)
-        x, _ = self.lstm(x)     # x.size(): (1,5,256)
-        x_out = x[:, -1, :]     # 全连接层的输入为神经网络最后一层最后一个time step的输出
-        x = self.linear1(x_out)     # x.size() : (1,2)
-        return x  详细解释一下这个网络的原理
+        x = x.unsqueeze(0)
+        x, _ = self.lstm(x)
+        x_out = x[:, -1, :]
+        x = self.linear1(x_out)     
+        return x
 \end{lstlisting}
 这个 DisambiguationLSTM 是一个基于 PyTorch 的 LSTM（长短期记忆网络）模型，专门用于处理序列数据。以下是对该模型的详细解释：
 \begin{enumerate}
@@ -382,10 +395,10 @@ class DisambiguationLSTM(nn.Module):
       output_doc = Document()
       for paragraph in output_paragraphs_with_pinyin:
           p = output_doc.add_paragraph(paragraph)
-          p.paragraph_format.first_line_indent = Pt(21)  # 设置首行缩进
+          p.paragraph_format.first_line_indent = Pt(21)
           for run in p.runs:
               run.font.name = '宋体'
-              run.font.size = Pt(12)  # 设置字体大小为小四号（12磅）
+              run.font.size = Pt(12)
   
       output_doc.save(output_doc_path)
   \end{lstlisting}
@@ -401,20 +414,16 @@ class DisambiguationLSTM(nn.Module):
   \begin{lstlisting}[caption={Trick2实现代码}, label={lst:example}]
 for word in sentence：
     if word in train_data.keys():
-        # LSTM 见过，使用模型推理
     elif word not in train_data.keys() and word in standard_dict.keys() and word in poly_dict.keys():
-       # LSTM 没见过，但是是多音字，且8105个汉字的标准发音字典有
        pron = standard_dict[word]
 
     elif word not in train_data.keys() and word not in standard_dict.keys() and word in poly_dict.keys():
-       #  LSTM 没见过，但是是多音字，且8105个汉字的标准发音字典里没有
        pron = poly_dict[word]
        
     elif word in poly_dict.keys():
-       # 如果不是多音字，跳过
        continue
 \end{lstlisting}
-参考：一种新的基于规则的多音字自动注音方法，《通用规范汉字表》txt文件截图：
+参考：一种新的基于规则的多音字自动注音方法，《通用规范汉字表》txt文件截图如\ref{fig:img6}所示：
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{figures/image6.png}
@@ -432,12 +441,13 @@ for word in sentence：
   \item 注音，并更新注音在新句子中，并更新循环检测时的下标检索
 \end{enumerate}
 \subsubsection{模型结果}
-以下展示了method2在不同数据集以及使用trick后的实验结果：
+表\ref{tab4}，图\ref{fig:image7}，图\ref{fig:image8}展示了method2在不同数据集以及使用trick后的实验结果：
 \begin{table}[h!]
 \centering
 \caption{Benchmark Results for Different Methods}
 \begin{tabular}{@{}lccc@{}}
 \toprule
+\label{tab4}
 \textbf{Method} & \textbf{Normal Benchmark (eval.docx)} & \multicolumn{2}{c}{\textbf{Multiple Sound Characters (eval2.docx)}} \\ 
 \cmidrule(r){3-4}
   & & \textbf{use\_jieba: True} & \textbf{use\_jieba: False} \\ 
@@ -486,6 +496,171 @@ prompt具体来说使用了少样本示例的方法进行提示，激发了模�
     \item prompt\_student = 你现在是小学三年级学生，作业是检查下面的文档请检查以下内容的注音是否正确，并提供简单反馈。
 \end{itemize}
 我们可以看到，在prompt中，我们可以结合任务场景，在prompt中设计不同年级，进而得到不同的注音效果。
+
+\subsection{方法三进阶版：使用大模型 api 实现端到端注音}
+\subsubsection{模型使用和多模型切换}
+本脚本集成了两个语言模型（LLM），主要包括 SparkAI 和 OpenAI 的 LLM 模型。用户可以根据需求在这些模型之间切换，以实现不同的功能和性能优化。
+\begin{itemize}
+    \item \textbf{一、集成的模型}
+    \begin{tcolorbox}[title=SparkAI (\texttt{‘ChatSparkLLM’})]
+        \textbf{用途:} 用于调用 SparkAI 提供的语言模型服务。\\
+        \textbf{配置参数:} \\
+        \texttt{'spark\_api\_url'}: SparkAI API 的 WebSocket URL。\\
+        \texttt{'spark\_app\_id'}: SparkAI 应用 ID。\\
+        \texttt{'spark\_api\_key'}: SparkAI API 密钥。\\
+        \texttt{'spark\_api\_secret'}: SparkAI API 秘钥。\\
+        \texttt{'spark\_llm\_domain'}: SparkAI 模型域。\\
+        \texttt{'streaming'}: 是否启用流式传输。
+    \end{tcolorbox}
+    \begin{tcolorbox}[title=OpenAI (\texttt{‘ChatOpenAI’})]
+        \textbf{用途:} 用于调用 OpenAI 的 ChatGPT 模型（如 \texttt{'gpt3.5turbo'}）。\\
+        \textbf{配置参数:} \\
+        \texttt{'model'}: 使用的 OpenAI 模型名称。\\
+        \texttt{'openai\_api\_key'}: OpenAI API 密钥。\\
+        \texttt{'openai\_api\_base'}: OpenAI API 基础 URL。\\
+        \texttt{'temperature'}: 生成文本的温度参数，控制生成内容的随机性。
+    \end{tcolorbox}
+    \item \textbf{二、多模型切换机制}\\
+        脚本提供了两个函数用于调用不同的模型：\\
+        \begin{itemize}
+            \item `\textbf{\textit{call\_llm\_api(prompt)}}`: 调用 SparkAI 的语言模型。\\
+            \item`\textbf{\textit{call\_llm\_api1(prompt)}}`: 调用 OpenAI 的 ChatGPT 模型。\\
+        \end{itemize}
+        用户可以根据需要选择调用哪一个模型。例如，默认情况下，`call\_llm\_api` 使用 SparkAI，但如果需要使用 OpenAI，可以调用 `call\_llm\_api1`，调用示例如下：
+        \begin{lstlisting}[caption={使用示例代码}, label={lst3}]
+        ##使用SparkAI模型
+        response_sparkai = call_llm_api("请进行分词。")
+        print(response_sparkai)
+
+        ##使用OpenAI模型
+        response_openai = call_llm_api1("请进行分词。")
+        print(response_openai)
+        \end{lstlisting}
+    此外，考虑到鲁棒性，当SparkAI模型输出不符合要求时，会自动使用GPT重复之前的工作。
+\end{itemize}
+\subsubsection{详细的算法流程}
+功能：主执行流程，处理用户输入的句子，进行分词、拼音注音、多音字处理，并输出注音后的句子。\\
+\indent 实现步骤：
+\begin{itemize}
+  \item \textbf{一、输入句子}\\
+  提示用户输入要处理的句子。
+  \item \textbf{二、分词}
+  \begin{itemize}
+  \item 构造 `prompt1`，要求模型根据语义对句子进行分词，并以 JSON 格式返回分词结果。
+  \item 调用 `call\_llm\_api` 发送提示，获取回复。
+  \item 使用 `extract\_first\_json` 提取 JSON 数据，获取`"segmented\_sentence"`。
+\end{itemize}
+  \item \textbf{三、拼音注音}
+  \begin{itemize}
+  \item 构造 `prompt`，要求模型为每个分词注音，并以 JSON 格式返回注音结果。
+  \item 调用 `call\_llm\_api` 发送提示，获取回复。
+  \item 使用 使用 `extract\_first\_json` 提取 JSON 数据，获取 `"words"` 列表。
+\end{itemize}
+  \item \textbf{四、生成完整句子和拼音}
+  \begin{itemize}
+  \item 合并词语生成完整句子。
+  \item 合并拼音生成完整拼音字符串。
+  \item 调用 `process\_pinyin\_dict` 处理拼音分割，确保拼音与句子完全对齐。
+\end{itemize}
+  \item \textbf{五、注音后的句子}
+  \begin{itemize}
+  \item 检查句子和拼音的汉字与拼音数量是否一致。
+  \item 遍历原始输入句子，逐个字符匹配拼音。
+  \item 对于多音字，使用 `check\_character` 检测是否为多音字，若是，则在字符后注音。
+\end{itemize}
+  \item \textbf{六、输出结果}
+  \begin{itemize}
+  \item 输出完整句子和完整拼音。
+  \item 输出注音后的句子。
+\end{itemize}
+  \item \textbf{七、错误处理}\\
+  在分词和注音过程中，若 JSON 解析失败或数据不完整，提供调试信息并尝试修复，如果无法修复则中止执行。
+\end{itemize}
+\subsubsection{可选拓展功能：在大数据集中寻找样例}
+脚本提供了一个可选的拓展功能，通过 `find\_examples` 函数，可以在大数据集中搜索包含指定多音字及其发音的例句。这对于构建多音字的语料库或进行语言学研究具有重要意义。
+  \begin{itemize}
+  \item \textbf{一、功能概述}\\
+  \textbf{目标}：在大规模文本数据集中找到包含特定多音字及其指定发音的句子。\\
+  \textbf{应用场景}：构建多音字的发音语料库、进行拼音和发音分析、语言教学和研究。
+  \item \textbf{二、数据准备}\\
+  要使用 `find\_examples` 函数，需要准备以下数据文件：\\
+  1. 句子文件 (`file1.sent`)：
+     \begin{itemize}
+     \item 每行包含一个中文句子。
+     \item 句子中的多音字用下划线 `▁` 包围，例如：`我爱▁地▁球。`
+     \end{itemize}
+  2. 拼音文件 (`file2.lb`)：
+  \begin{itemize}
+  \item 每行对应 `file1.sent` 中句子的拼音。
+  \item 多音字的拼音用空格分隔。
+  \end{itemize}
+  \begin{tcolorbox}[colback=black!85!white, colframe=gray!80!black, title=示例内容, width=\linewidth, sharp corners, fontupper=\color{white}]
+    \texttt{file1.sent}: \\
+    过于看\_\_重\_\_新技术不利于优质内容\_\_的\_\_生产
+    
+    \texttt{file2.lb}: \\
+    zhong4 de
+\end{tcolorbox}
+
+\item 三、函数使用\\
+\textbf{1、函数签名:}
+\begin{itemize}
+    \item def find\_examples(char, pronunciation):
+\end{itemize}
+% Section for parameters
+\textbf{2、参数:}
+\begin{itemize}
+    \item \texttt{char} (\texttt{str}): 目标多音字，例如 ``地''。
+    \item \texttt{pronunciation} (\texttt{str}): 目标发音，例如 ``de''。
+\end{itemize}
+
+\textbf{3、返回值:}
+\begin{itemize}
+    \item \texttt{list}: 包含例句及上下文信息的字典列表，每个字典包含以下键：
+    \begin{itemize}
+        \item \texttt{sentence} (\texttt{str}): 包含目标多音字的完整句子。
+        \item \texttt{word\_context} (\texttt{str}): 包含目标词语及其上下文的字符串。
+        \item \texttt{word} (\texttt{str}): 包含目标多音字的词语。
+    \end{itemize}
+\end{itemize}
+
+\end{itemize}
+
+\begin{lstlisting}[caption={示例代码}, label={lst:example}]
+    ##查找多音字 '地' 发音为 'de' 的例句
+    examples = find_examples('地', 'de')
+    for example in examples:
+        print(f"句子: {example['sentence']}")
+        print(f"词语上下文: {example['word_context']}")
+        print(f"词语: {example['word']}")
+        print("" * 50)
+    \end{lstlisting}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.9\linewidth]{figures/image9.png}
+        \caption{输出示例}
+        \label{fig:ente}
+    \end{figure}
+
+\subsection{模型性能对比}
+为了测试四种方法的性能，我们使用eval2.docx进行了测试，四种方法的准确率如表\ref{tab1}所示：
+\begin{table}[H] % 使用 table 环境并设置浮动选项为 H
+    \centering
+    \begin{tabular}{>{\centering\arraybackslash}p{0.3\textwidth} >{\centering\arraybackslash}p{0.3\textwidth}} % 设置表格宽度及比例
+        \toprule
+        \textbf{method} & \textbf{acc} \\ % 表头
+        \midrule
+        method1 & 89.8\% \\
+        method2(v3) & 90.2\% \\
+        method3 & 96.2\% \\
+        method3++ & 100\% \\
+        \bottomrule
+    \end{tabular}
+    \caption{各方法准确率对比}
+    \label{tab1}
+\end{table}
+
 \subsection{UI设计}
 我们设计的ui是一个基于 Flask 的 Web 应用程序，
 旨在为用户提供文本和 Word 文档多音字生僻字注音处理的功能。通过清晰的界面和直观的交互，
@@ -505,52 +680,30 @@ prompt具体来说使用了少样本示例的方法进行提示，激发了模�
     \end{itemize}
     \item 界面展示
     \begin{itemize}
-        \item Home界面展示
-        \begin{figure}[H]
+        \item Home界面展示如\ref{fig_E1}所示，界面设计采用现代风格，具有良好的视觉效果，通过流畅的界面轮换提升用户体验。
+        \begin{figure}[htbp]
             \centering
-            \includegraphics[width=0.7\linewidth]{figures/fig1.png}
-            \caption{home界面1}
-            \label{fig1}
-        \end{figure}
-        \begin{figure}[H]
+            \subfigure[home界面1] {\includegraphics[width=.7\textwidth]{figures/fig1.png}}\\
+            \subfigure[home界面2] {\includegraphics[width=.7\textwidth]{figures/fig2.png}}
+            \caption{home界面}
+            \label{fig_E1}
+        \end{figure}  
+        
+        \item method界面展示如图\ref{fig_E2}所示，应用程序包含四种处理方法：\\
+        method1：直接基于pypinyin和字库检索进行匹配，提供了文本和word文件两种输入方法进行多音字生僻字注音标注。\\
+        method2：核心是使用了BiLSTM模型，提供了文本和word文件两种输入方法进行多音字生僻字注音标注。\\
+        method3：实现了使用大模型api端到端的注音⽅法。\\
+        challenge：在测试模型的过程中，我们注意到对于一句话中的连续多音字，传统模型往往难以识别，如： “我兴奋地踏上这片土地”，“我怀着沉重的心情重复地哭诉”， “去银行取钱真是不虚此行”，“还有，借你的书该还我了”， “你说过的话的确有道理”等。因此我们继续基于大模型，搭建了能专门处理这些极端情况的模型。\\
+        除此以外，每种方法都可以通过两种方法输入，分别是文本输入和word文档输入。在method2和method3中还支持用户通过下拉框选择不同的模型进行推理，以增强灵活性和针对性。
+        \begin{figure}[htbp]
             \centering
-            \includegraphics[width=0.7\linewidth]{figures/fig2.png}
-            \caption{home界面2}
-            \label{fig2}
-        \end{figure}
-        两个界面轮换，提供处理多音字生僻字的入口。
-        \item method1
-        \begin{figure}[H]
-            \centering
-            \includegraphics[width=0.7\linewidth]{figures/fig3.png}
-            \caption{method1界面展示}
-            \label{fig3}
-        \end{figure}
-        模型1直接基于pypinyin和字库检索进行匹配，提供了文本和word文件两种输入方法进行多音字生僻字注音标注。
-        \item method2
-        \begin{figure}[H]
-            \centering
-            \includegraphics[width=0.7\linewidth]{figures/fig4.png}
-            \caption{method2界面展示}
-            \label{fig4}
-        \end{figure}
-        模型2的核心是使用了BiLSTM模型，提供了文本和word文件两种输入方法进行多音字生僻字注音标注。
-        \item method3
-        \begin{figure}[H]
-            \centering
-            \includegraphics[width=0.7\linewidth]{figures/fig5.png}
-            \caption{method3界面展示}
-            \label{fig5}
-        \end{figure}
-        模型3实现了使用大模型api端到端的注音⽅法。
-        \item challenge
-        \begin{figure}[H]
-            \centering
-            \includegraphics[width=0.7\linewidth]{figures/fig6.png}
-            \caption{challenge界面展示}
-            \label{fig6}
-        \end{figure}
-        在测试模型的过程中，我们注意到对于一句话中的连续多音字，传统模型往往难以识别，如： “我兴奋地踏上这片土地”，“我怀着沉重的心情重复地哭诉”， “去银行取钱真是不虚此行”，“还有，借你的书该还我了”， “你说过的话的确有道理”等。因此我们继续基于大模型，搭建了能专门处理这些极端情况的模型。
+            \subfigure[method1界面展示] {\includegraphics[width=.65\textwidth]{figures/fig3.png}}\\
+            \subfigure[method2界面展示] {\includegraphics[width=.65\textwidth]{figures/fig4.png}}
+            \subfigure[method3界面展示] {\includegraphics[width=.65\textwidth]{figures/fig5.png}}
+            \subfigure[challenge界面展示] {\includegraphics[width=.65\textwidth]{figures/fig6.png}}
+            \caption{界面展示}
+            \label{fig_E2}
+        \end{figure} 
         \item About Us
         \begin{figure}[H]
             \centering
@@ -558,7 +711,7 @@ prompt具体来说使用了少样本示例的方法进行提示，激发了模�
             \caption{About Us界面展示}
             \label{fig7}
         \end{figure}
-        简单介绍了小组成员及分工。
+        图\ref{fig7}简单介绍了小组成员及分工。
         \item 示例
         \begin{figure}[H]
             \centering
@@ -566,21 +719,21 @@ prompt具体来说使用了少样本示例的方法进行提示，激发了模�
             \caption{示例一}
             \label{fig8}
         \end{figure}
-        使用模型1进行文本注音，如图所示，注音准确率较高，并无明显错误。
+        如图\ref{fig8}所示，使用模型1进行文本注音，注音准确率较高，并无明显错误。
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.7\linewidth]{figures/fig9.pic.jpg}
             \caption{示例二}
             \label{9}
         \end{figure}
-        如图所示，左侧为输入文本，右侧为模型2训练后输出文本，多音字和生僻字注音后并无明显错误。
+        如图\ref{9}所示，左侧为输入文本，右侧为模型2训练后输出文本，多音字和生僻字注音后并无明显错误。
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.7\linewidth]{figures/fig10.png}
             \caption{示例三}
             \label{10}
         \end{figure}
-        部分连续多音字在模型123中并不能得到很好的解决，如"你说过的话的确有道理"，在模型1中注音错误，并且在模型23中也得不到很好的解决，但是在challenge模型中可以得到很好的解决，如上图所示，challenge模型在部分连续多音字中可以取得较高准确率。
+        部分连续多音字在模型123中并不能得到很好的解决，如"你说过的话的确有道理"，在模型1中注音错误，并且在模型23中也得不到很好的解决，但是在challenge模型中可以得到很好的解决，如图\ref{10}所示，challenge模型在部分连续多音字中可以取得较高准确率。
     \end{itemize}
 \end{itemize}
 \section{小组分工}
@@ -591,7 +744,7 @@ prompt具体来说使用了少样本示例的方法进行提示，激发了模�
         \textbf{工作内容} & \textbf{成员名称} \\ % 表头
         \midrule
         method1代码实现 & 张志成 \\
-        method2代码实现 & 张志成，江震南，左斌斌 \\
+        method2代码实现 & 张志成，江震南，左斌斌，孟鑫攀 \\
         method3代码实现 & 郝锐，邱骏坤 \\
         难字实现 & 左斌斌，孟鑫攀 \\
         UI实现 & 曾楠馨，沙霖 \\
